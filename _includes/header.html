@@ -21,8 +21,13 @@
 
           <nav class="cover-navigation cover-navigation--primary">
             <ul class="navigation">
-              <li class="navigation__item"><a href="{{ page.url | relative_url }}#fiction" class="navigation__button fiction-button">Fiction</a></li>
-              <li class="navigation__item"><a href="{{ page.url | relative_url }}#blog" class="navigation__button blog-button">Blog</a></li>
+              {% if paginator.page >= 1 %}
+                <li class="navigation__item"><a href="#fiction" class="navigation__button fiction-button">Fiction</a></li>
+                <li class="navigation__item"><a href="#blog" class="navigation__button blog-button">Blog</a></li>
+              {% else %}
+                <li class="navigation__item"><a href="{{ "/" | relative_url }}#fiction" class="navigation__button fiction-button">Fiction</a></li>
+                <li class="navigation__item"><a href="{{ "/" | relative_url }}#blog" class="navigation__button blog-button">Blog</a></li>
+              {% endif %}
             </ul>
           </nav>
 
@@ -72,10 +77,17 @@
             {% if site.author.email %}
               <!-- Email -->
               <li class="navigation__item">
-                <a class="navigation__button" href="{{ page.url | relative_url }}#contact">
+              {% if paginator.page >= 1 %}
+                <a class="navigation__button" href="#contact">
                   <i class="icon icon-mail"></i>
                   <span class="label">Email</span>
                 </a>
+              {% else %}
+                <a class="navigation__button" href="{{ "/" | relative_url }}#contact">
+                  <i class="icon icon-mail"></i>
+                  <span class="label">Email</span>
+                </a>
+              {% endif %}
               </li>
             {% endif %}
 
