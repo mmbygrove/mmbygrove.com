@@ -28,8 +28,9 @@ defaults:
 # ==============
 
 # destination: _site
-paginate: 1000
-permalink: /:year/:title/
+permalink: /:year/:title.html
+paginate: 5
+paginate_path: "/page:num"
 markdown: kramdown
 highlighter: rouge
 

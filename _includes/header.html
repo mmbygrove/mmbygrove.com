@@ -21,8 +21,8 @@
 
           <nav class="cover-navigation cover-navigation--primary">
             <ul class="navigation">
-              <li class="navigation__item"><a href="{{ "/#fiction" | relative_url }}" class="navigation__button fiction-button">Fiction</a></li>
-              <li class="navigation__item"><a href="{{ "/#blog" | relative_url }}" class="navigation__button blog-button">Blog</a></li>
+              <li class="navigation__item"><a href="{{ page.url | relative_url }}#fiction" class="navigation__button fiction-button">Fiction</a></li>
+              <li class="navigation__item"><a href="{{ page.url | relative_url }}#blog" class="navigation__button blog-button">Blog</a></li>
             </ul>
           </nav>
 
@@ -72,7 +72,7 @@
             {% if site.author.email %}
               <!-- Email -->
               <li class="navigation__item">
-                <a class="navigation__button" href="{{ "/#contact" | relative_url }}">
+                <a class="navigation__button" href="{{ page.url | relative_url }}#contact">
                   <i class="icon icon-mail"></i>
                   <span class="label">Email</span>
                 </a>
