@@ -55,7 +55,8 @@ layout: null
 
     function isIndexPage(pagePath) {
         var indexRegEx = new RegExp('^\/(page[0-9]+\/)?(index(.html)?)?$');
-        return pagePath.match(indexRegEx)
+        console.log('pagePath = ' + pagePath);
+        return pagePath.match(indexRegEx);
     }
 
     function hideContent() {
