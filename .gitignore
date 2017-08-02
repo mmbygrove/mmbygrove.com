@@ -1,7 +1,10 @@
 .DS_Store
-.ruby-version
+
+# Core
 .rbenv-vars
-/.bundle/*
-/vendor/*
-/_site/*
-.rbenv-vars
+.bundle
+
+# Jekyll
+_site
+.sass-cache
+.jekyll-metadata
