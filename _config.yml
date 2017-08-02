@@ -41,6 +41,7 @@ kramdown:
   hard_wrap: false
 
 gems:
+  - jekyll-feed
   - jekyll-paginate
 
 exclude:
