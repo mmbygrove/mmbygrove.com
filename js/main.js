@@ -54,7 +54,7 @@ layout: null
     }
 
     function isIndexPage(pagePath) {
-        var baseUrl = '{{ "' + pagePath + '" | relative_url }}'.replace(/\/+$/, ''),
+        var baseUrl = '{{ "'+pagePath+'" | relative_url }}'.replace(/\/+$/, ''),
             indexPath = new RegExp(baseUrl + '\/index(.html)?');
         return pagePath === baseUrl ? true : pagePath.match(indexPath)
     }
