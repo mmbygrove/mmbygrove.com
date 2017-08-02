@@ -1,0 +1,357 @@
+#!/usr/bin/env bash
+
+VERSION='1.0'
+
+# PRE-REQUISITES
+# ==============
+
+# curl
+if ! type -P curl > /dev/null; then
+    echo "Please install CURL before using this script"
+    exit 1
+fi
+
+# homebrew
+if ! type -P brew > /dev/null; then
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+fi
+
+# jq
+if ! type -P jq > /dev/null; then
+    brew install jq
+fi
+
+# fswatch
+if ! type -P fswatch > /dev/null; then
+    brew install fswatch
+fi
+
+# rbenv
+if ! type -P rbenv > /dev/null; then
+    brew install rbenv rbenv-vars
+fi
+export RBENV_ROOT="$(brew --prefix)/var/rbenv"
+eval "$(rbenv init -)";
+cd $(dirname ${0})
+
+# CONFIGURATION
+# =============
+
+# Default variables and their values
+: ${JEKYLL_CLEAN:="jekyll clean"}
+: ${JEKYLL_BUILD:="jekyll build"}
+: ${JEKYLL_SERVE:="jekyll serve"}
+
+: ${RBENV_VARS_FILE:=".rbenv-vars"}
+
+# Document available command line options. This function
+# simply outputs script's SYNOPSIS to the user terminal.
+__help() {
+cat << EOF
+Usage:
+    ${0} [options] [arguments]
+
+    A custom wrapper to used to help with setting up and starting jekyll
+    in the development environments.
+
+        Options                 All options are optional and
+        -------                 can be supplied in any order.
+
+        -o --open-url           Open generated site in a new tab (serve)
+        -d --debug              Run jekyll in the debug mode (build, serve)
+        -l --log=<path>         Redirect all output to a file
+        -q --quiet              Suppress output of the script
+        -? --help               Display this help message
+        --version               Script and BASH version info
+
+        Arguments               All agruments are optionals and
+        ---------               can be supplied in any order.
+
+        clean                   Removes all of jekyll build artefacts, bundled
+                                gems, and version control files: Gemfile.lock,
+                                .ruby-version.
+
+        install                 Installs .ruby-version if the file is missing,
+                                adds all required build tools (inc. ruby),
+                                runs bundle install.
+
+        build                   Instructs jekyll to build your site and
+                                populate the contents of the _site directory.
+
+        serve, server           Instructs jekyll to build your site and then
+                                starts the server and serves it locally.
+
+    <> - required parameters    [] - optional parameters
+    Use 'less ${0}' to view further documentation.
+EOF
+}
+
+# This function is called when the script receives an EXIT pseudo-signal. It
+# simulates a common destructor behaviour inside BASH scripts. It allows this
+# script to release and clean up resources upon termination.
+__exit() {
+    : # Replace with actual destructor code
+}
+
+# FUNCTIONS
+# =========
+
+# Insure the presence of OPTARG in the current scope. If OPTARG is missing then
+# display help message via __help and exit with an error code.
+require_OPTARG() {
+    if [[ -z ${OPTARG} ]]; then
+        echo "${0}: option requires an argument -- ${OPTKEY}" >&2
+        __help
+        exit 1
+    fi
+}
+
+# Test if a given value means NO.
+is_false() {
+    local value="$(echo ${1} | tr [:upper:] [:lower:])"
+
+    if [[ -z ${value} || ${value} =~ ^0|n|no|false|none|null|nil$ ]]; then
+        return 0
+    fi
+
+    return 1
+}
+
+# Test if a given value means YES.
+is_true() {
+    if is_false ${1}; then
+        return 1
+    fi
+
+    return 0
+}
+
+# Retrieve absolute path for a given relative path, of which all but the
+# last component must exist.
+abspath() {
+    if [[ -z "${1}" ]]; then
+        echo "${0}: function requires an argument" >&2
+        exit 1
+    fi
+
+    # Expand user's home directory if required
+    case "${1}" in
+        '~')
+            local path="${HOME}"
+            ;;
+        '~/'*)
+            local path="${HOME}/${1:2}"
+            ;;
+        '~'*/*)
+            local path="$(echo ${1%%/*})/${1#*/}"
+            ;;
+        '~'*)
+            local path="$(echo ${1})"
+            ;;
+        *)
+            local path="${1}"
+            ;;
+    esac
+
+    # Initialise local variables
+    local dirname=$(dirname "${path}")
+    local basename=$(basename "${path}")
+
+    # Fetch absolute path of the parent directory
+    if [[ -d "${dirname}" ]]; then
+        local dirname=$(cd "${dirname}" && pwd)
+    else
+        echo "${0}: no such file or directory -- ${dirname}" >&2
+        return 1
+    fi
+
+    # Dirname special case
+    if [[ "${dirname}" == '/' ]]; then
+        local dirname=''
+    fi
+
+    # Basename special cases
+    case "${basename}" in
+        /)
+            echo '/'
+            ;;
+        .)
+            echo "${dirname}"
+            ;;
+        ..)
+            echo $(dirname "${dirname}")
+            ;;
+        *)
+            echo "${dirname}/${basename}"
+            ;;
+    esac
+}
+
+# Given two paths (origin and target) generate a relative path that leads
+# from origin to target. All but the last component must exist in both paths.
+relpath() {
+    if [[ -z "${1}" || -z "${2}" ]]; then
+        echo "${0}: function requires two arguments" >&2
+        exit 1
+    fi
+
+    # Ensure that we alwais work with absolute paths
+    local origin=$(abspath "${1}")
+    local target=$(abspath "${2}")
+
+    # Initialise common prefix between origin and target
+    local common="$origin"
+    local result='.'
+
+    # Build result from origin to the common prefix
+    while [[ "${target#${common}}" == "${target}" ]]; do
+        local common=$(dirname "${common}")
+        local result="${result}/.."
+    done
+
+    # Account for the special case of root being the only common ground
+    if [[ $common == '/' ]]; then
+        echo "${result}/${target#$common}"
+        return 0
+    fi
+
+    echo "${result}${target#$common}"
+}
+
+# COMMAND LINE OPTIONS
+# =====================
+#
+# By default BASH does not provide support for long options. However, we can
+# trick it into doing so by defining '-:' as part of the optspec. This
+# exploits a non-standard behaviour of the shell which permits the
+# option-argument to be concatenated to the option, eg: -f arg == -farg
+while getopts "odl:q?-:" OPTKEY; do
+
+    if [[ "${OPTKEY}" = '-' ]]; then
+        OPTKEY=`echo ${OPTARG} | sed -e 's/=.*//'`
+        OPTARG=`echo ${OPTARG} | sed -e "s/^${OPTKEY}=\{0,1\}//"`
+    fi
+
+    case ${OPTKEY} in
+        'o'|'open-url')
+            JEKYLL_SERVE+=" --open-url"
+            ;;
+        'd'|'debug')
+            JEKYLL_SERVE+=" --verbose --trace"
+            JEKYLL_BUILD+=" --verbose --trace"
+            ;;
+        'l'|'log')
+            require_OPTARG
+            if abspath ${OPTARG} > /dev/null; then
+                exec > ${OPTARG} 2>&1
+            else
+                echo "${0}: Failed to redirect output to file"
+                exit 1
+            fi
+            ;;
+        'q'|'quiet')
+            exec > /dev/null
+            ;;
+        'version')
+            echo "Shell script $0 version ${VERSION}"
+            echo $(bash --version | head -n 1)
+            echo $(ruby --version)
+            echo $(bundle exec jekyll --version)
+            exit
+            ;;
+        '?'|'help')
+            __help
+            exit
+            ;;
+        *)
+            if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
+                echo "${0}: illegal option -- ${OPTKEY}" >&2
+                __help
+                exit 1
+            fi
+            ;;
+    esac
+done
+
+# Clear all options and reset the command line argument count
+shift $(( OPTIND -1 ))
+
+# Check for an option-terminator string
+if [[ "${1}" == "--" ]]; then
+    shift
+fi
+
+# Initialise script destructor
+trap __exit EXIT
+
+# SCRIPT ARGUMENTS
+# ================
+
+# Script is executed with no arguments
+if [[ ${!#} == ${0} ]]; then
+    ARGS='serve'
+fi
+
+# Process all supplied arguments
+for ARG in ${ARGS-${@}}; do
+    case ${ARG} in
+        'clean')
+            # bundle exec ${JEKYLL_CLEAN}
+            rm -Rvf .bundle
+            rm -fv Gemfile.lock
+            # rbenv local --unset
+            ;;
+        'install')
+            if ! rbenv local > /dev/null; then
+                : ${GITHUB_PAGES_DEPENDENCIES:=$(curl -L "https://pages.github.com/versions.json")}
+                : ${GITHUB_RUBY_VERSION:=$(echo ${GITHUB_PAGES_DEPENDENCIES} | jq -r '.ruby')}
+            fi
+            : ${GITHUB_RUBY_VERSION:=$(rbenv local)}
+            : ${CURRENT_RUBY_VERSION:=$(ruby -e 'puts RUBY_VERSION')}
+            if [[ -z "${GITHUB_RUBY_VERSION}" ]]; then
+                echo "Failed to determine which version of ruby is required by github-pages."
+                echo "Please visit https://pages.github.com/versions/, and install it manually."
+            elif [[ "${GITHUB_RUBY_VERSION}" != "${CURRENT_RUBY_VERSION}" ]]; then
+                rbenv install --skip-existing ${GITHUB_RUBY_VERSION} && \
+                rbenv local ${GITHUB_RUBY_VERSION} && \
+                ( gem update bundler || gem install bundler )
+            fi
+            if [[ ! -s "${RBENV_VARS_FILE}" ]]; then
+                echo "Missing personal access token for github."
+                echo "Please visit https://github.com/settings/tokens"
+                echo "... and create a token with [repo -> public_repo] access rights"
+                read -p "Personal access token: " JEKYLL_GITHUB_TOKEN
+                echo "JEKYLL_GITHUB_TOKEN?=${JEKYLL_GITHUB_TOKEN}" > ${RBENV_VARS_FILE}
+            fi
+            git submodule update --recursive --remote
+            bundle install --path .bundle
+            ;;
+        'build')
+            bundle exec ${JEKYLL_BUILD}
+            ;;
+        'serve'|'server')
+            bundle exec ${JEKYLL_SERVE} &
+            JEKYLL_PID=$!
+            JEKYLL_SERVE=${JEKYLL_SERVE//--open-url}
+            trap 'JEKYLL_STOP=true' SIGINT
+            while fswatch --one-event --timestamp ./_config.yml; do
+                if is_true ${JEKYLL_STOP}; then
+                    echo ""
+                    break
+                else
+                    kill -TERM ${JEKYLL_PID} 2>/dev/null
+                    wait ${JEKYLL_PID} 2>/dev/null
+                    bundle exec ${JEKYLL_SERVE} &
+                    JEKYLL_PID=$!
+                fi
+            done
+            trap - SIGINT
+            ;;
+        *)
+            # Fail if invalid command line argument is given
+            echo "${0}: illegal argument -- ${ARG}" >&2
+            __help
+            exit 1
+            ;;
+    esac
+done
