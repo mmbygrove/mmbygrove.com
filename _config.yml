@@ -2,7 +2,7 @@
 # =============
 
 title: M. M. Bygrove
-url: 'http://mmbygrove.com/'
+url: 'http://mmbygrove.com'
 # description: “Writing fiction is like crossing the Atlantic Ocean in a bathtub.”
 
 author:
@@ -13,7 +13,7 @@ author:
   # github_username:  joshgerdes
   # linkedin_username:  joshgerdes
 
-baseurl: /
+# baseurl: /
 # google_analytics: 'UA-XXXXXX-X'
 disqus_shortname: 'mmbygrove'
 
@@ -27,7 +27,7 @@ defaults:
 # Build settings
 # ==============
 
-destination: _site
+# destination: _site
 paginate: 1000
 permalink: /:year/:title/
 markdown: kramdown
@@ -43,8 +43,8 @@ gems:
   - jekyll-paginate
 
 exclude:
+  - README.md
+  - CNAME
   - Gemfile
   - Gemfile.lock
-  - vendor
-  - README.md
-  - screenshot.png
+  - jekyll

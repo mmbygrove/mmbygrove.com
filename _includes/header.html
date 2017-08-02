@@ -3,12 +3,12 @@
   <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
 </span>
 
-<header class="panel-cover" style="background-image: url({{ "images/cover.jpg" | prepend: site.baseurl }})">
+<header class="panel-cover" style="background-image: url({{ "/images/cover.jpg" | relative_url }})">
   <div class="panel-main">
 
     <div class="panel-main__inner panel-inverted">
     <div class="panel-main__content">
-        <a href="{{ site.baseurl }}" title="link to home of {{ site.title }}">
+        <a href="{{ "/" | relative_url }}" title="link to home of {{ site.title }}">
           <h1 class="panel-cover__title panel-title">{{ site.title }}</h1>
         </a>
         <hr class="panel-cover__divider">
@@ -21,8 +21,8 @@
 
           <nav class="cover-navigation cover-navigation--primary">
             <ul class="navigation">
-              <li class="navigation__item"><a href="{{ site.baseurl }}#fiction" class="navigation__button fiction-button">Fiction</a></li>
-              <li class="navigation__item"><a href="{{ site.baseurl }}#blog" class="navigation__button blog-button">Blog</a></li>
+              <li class="navigation__item"><a href="{{ "/#fiction" | relative_url }}" class="navigation__button fiction-button">Fiction</a></li>
+              <li class="navigation__item"><a href="{{ "/#blog" | relative_url }}" class="navigation__button blog-button">Blog</a></li>
             </ul>
           </nav>
 
@@ -72,7 +72,7 @@
             {% if site.author.email %}
               <!-- Email -->
               <li class="navigation__item">
-                <a class="navigation__button" href="{{ site.baseurl }}#contact">
+                <a class="navigation__button" href="{{ "/#contact" | relative_url }}">
                   <i class="icon icon-mail"></i>
                   <span class="label">Email</span>
                 </a>
@@ -81,7 +81,7 @@
 
             <!-- RSS -->
             <li class="navigation__item">
-              <a href="{{ "feed.xml" | prepend: site.baseurl }}" title="Subscribe" target="_blank">
+              <a href="{{ "/feed.xml" | relative_url }}" title="Subscribe" target="_blank">
                 <i class="icon icon-rss"></i>
                 <span class="label">RSS</span>
               </a>
