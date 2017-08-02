@@ -29,7 +29,7 @@ defaults:
 
 # destination: _site
 permalink: /:year/:title.html
-paginate: 5
+paginate: 1000
 paginate_path: "/page:num"
 markdown: kramdown
 highlighter: rouge
