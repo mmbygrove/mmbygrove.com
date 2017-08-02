@@ -1,0 +1,27 @@
+- title:  Corn Tale
+  image: CornTale.jpeg
+  description: "They colonized the whole planet with our help. Now they're ready to form a new alliance. Environmental tale with a twist."
+  length: "1,800"
+  publishers:
+    amazon: http://amzn.to/2eF6P5r
+
+- title:  Little Guilt
+  image: LittleGuilt.jpeg
+  description: "Like many an aspiring writer, Scott is desperate for his books to start selling &mdash; he's got an empty fridge and his rent to pay. So one day he decides to push his luck just a little bit."
+  length: "13,600"
+  publishers:
+    amazon: http://amzn.to/2cBJimy
+
+- title: The Adept
+  image: TheAdept.jpeg
+  description: "For hundreds of years generations of alchemists looked for a substance that would turn any metal into gold &mdash; the Philosopher's Stone. But what if, all those years, they were looking for the wrong thing? Alios, a young adept at the Alchemist Academy, just had a revelation&hellip;"
+  length: "3,700"
+  publishers:
+    amazon: http://amzn.to/2cXvogH
+
+- title: I, Demiurge
+  image: IDemiurge.jpeg
+  description: "Yesterday I went with Tau to see a new spec-sim. It was all about this alien species landing on our planet and how things changed afterwards. I didn’t really like it. <br><br>Today all everyone talked about was this asteroid. Apparently it's huge and supposed to be on a collision course with us&hellip;"
+  length: "4,600"
+  publishers:
+    amazon: http://amzn.to/2fw888H

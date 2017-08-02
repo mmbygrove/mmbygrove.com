@@ -1,0 +1,16 @@
+<img class="cover" src="/images/covers/{{ item.image }}">
+<h2 class="post-list__post-title post-title">{{ item.title }}</h2>
+<p class="excerpt">{{ item.description }}</p>
+<p class="post-list__meta">A short story of {{ item.length }} words.</p>
+{% if item.publishers %}
+  <p class="post-list__meta status publishers">
+    Available on:
+    {% for publisher in item.publishers %}
+      <a class="publisher {{ publisher[0] }}" href="{{ publisher[1] }}">{{ publisher[0] }}</a>
+    {% endfor %}
+  </p>
+{% else %}
+  <p class="post-list__meta status comming-soon">
+    <img class="comming-soon" src="/images/ComingSoon.png" alt="coming soon">
+  </p>
+{% endif %}

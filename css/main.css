@@ -1,0 +1,257 @@
+@import url(uno.css);
+@import url(monokai.css);
+
+/* Modifications */
+
+pre.highlight,
+.highlight pre {
+  padding: 10px;
+}
+
+pre.highlight code,
+.highlight pre code {
+  white-space: pre-wrap;
+}
+
+.btn,
+.navigation__item a {
+  margin: 5px 0;
+  white-space: nowrap;
+}
+
+.pagination__page-number {
+  display: inline-block;
+  padding: 10px;
+}
+
+.categories a,
+.tags a {
+  border: 1px solid #e25440;
+  border-radius: 20px;
+  color: #e25440;
+  display: inline-block;
+  font-size: 12px;
+  margin: 5px 0;
+  padding: 5px 10px;
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+.post-meta__tags {
+  font-size: 12px;
+  padding: 0 5px;
+}
+
+.footer__copyright {
+    margin: 0 20px 10px;
+}
+
+.user-image {
+  margin-bottom: 1.2em;
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border: 3px solid #fff;
+  border-radius:100%;
+}
+
+/* Library: overrides existing post-list classes */
+
+.main-library-list .post-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.main-library-list .post-list > li {
+    display: block;
+    position: relative;
+    width: 100%;
+}
+
+.main-library-list .post-list > li > * {
+    display: block;
+}
+
+.main-library-list .post-list > li:last-child {
+    margin: 0;
+}
+
+.main-library-list .post-list .cover {
+    float: none;
+    margin: 0 auto;
+    padding-right: 0;
+    padding-bottom: 2em;
+    max-width: 50%;
+}
+
+.main-library-list .post-list .post-list__meta.status {
+    margin-top: 1em;
+}
+
+.main-library-list .post-list .post-list__divider {
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.main-library-list .post-list > li:last-child .post-list__divider {
+    display: block;
+}
+
+@media all and (min-width: 568px) {
+    .main-library-list .post-list > li {
+    }
+
+    .main-library-list .post-list > li > * {
+        margin-left: 30%;
+    }
+
+    .main-library-list .post-list .cover {
+        float: left;
+        margin: 0;
+        padding-bottom: 2.2em;
+        max-width: 25%;
+    }
+
+    .main-library-list .post-list .post-list__divider {
+        clear:both;
+    }
+}
+
+/* Library: publishers */
+
+img.comming-soon {
+    height: 30px;
+}
+
+a.publisher {
+    background-repeat: no-repeat;
+    background-size: contain;
+
+    display: inline-block;
+    margin-left: 1em;
+    text-indent:-9999px;
+}
+
+a.publisher.amazon {
+    background-image: url('/images/publishers/amazon.png');
+    height: 25px;
+    width: 71px;
+}
+
+/* My overrides */
+
+.post img {
+  max-width: 100%;
+  float: none;
+}
+
+.post img.half-width {
+  max-width: 50%;
+  float: left;
+  padding-right: 2em;
+  padding-bottom: 2em;
+}
+
+.post p {
+  text-align: justify;
+}
+
+h1.post-title {
+  font-size: 2em !important;
+}
+
+.excerpt {
+  text-align: justify;
+}
+
+.main-post-list .post-list img, .main-post-list .excerpt img {
+  max-width: 20%;
+  float: left;
+  padding-right: 2em;
+  padding-bottom: 2em;
+}
+
+.post img:after, .excerpt img::after {
+    content: " ";
+    display: block;
+    clear: both;
+}
+
+.post-meta__tags a {
+	color: #c7c7c7;
+  text-decoration: underline;
+}
+
+.post-meta__tags a:hover {
+	color: #b9301c;
+}
+
+.panel-title {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+  font-size: 3em;
+}
+
+.panel-cover__description {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+  font-size: 1em;
+  letter-spacing: 0.1em;
+}
+
+.navigation__item a {
+  opacity: .6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+    letter-spacing: .03em;
+}
+
+.post-meta {
+	margin: 0 0 1em 0;
+}
+
+blockquote {
+	margin: 0 0 1.3em 0;
+	padding: 0 1em;
+	background: none;
+	border-left: 4px solid #eeeeee;
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+	border-radius: 3px;
+	font-family: inherit;
+	font-weight: lighter;
+	font-style: italic;
+	font-size: 1em;
+	text-align: center;
+}
+
+.thank-you-page h2+p {
+  margin-top: 3em;
+}
+
+.thank-you-page p {
+  margin-left: 2em;
+}
+
+a {
+	text-decoration: none;
+	color: #B0B375;
+}
+
+.categories a,
+.tags a {
+  border-color: #B0B375;
+  color: #B0B375;
+}
+
+.categories a:hover,
+.tags a:hover {
+  border-color: #b9301c;
+}
+
+.poem {
+  white-space: pre;
+  padding-left: 15%;
+  font-style: italic;
+}
