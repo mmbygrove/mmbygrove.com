@@ -54,11 +54,8 @@ layout: null
     }
 
     function isIndexPage(pagePath) {
-        var baseUrl = '{{ "'+pagePath+'" | relative_url }}'.replace(/\/+$/, ''),
-            indexPath = new RegExp(baseUrl + '\/index(.html)?');
-            console.log('baseUrl = ' + baseUrl);
-            console.log('pagePath = ' + pagePath);
-        return pagePath === baseUrl ? true : pagePath.match(indexPath)
+        var indexRegEx = new RegExp('^\/(page[0-9]+\/)?(index(.html)?)?$');
+        return pagePath.match(indexRegEx)
     }
 
     function hideContent() {
