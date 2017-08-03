@@ -1,48 +1,15 @@
 #!/usr/bin/env bash
 
-VERSION='1.0'
-
-# PRE-REQUISITES
-# ==============
-
-# curl
-if ! type -P curl > /dev/null; then
-    echo "Please install CURL before using this script"
-    exit 1
-fi
-
-# homebrew
-if ! type -P brew > /dev/null; then
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-fi
-
-# jq
-if ! type -P jq > /dev/null; then
-    brew install jq
-fi
-
-# fswatch
-if ! type -P fswatch > /dev/null; then
-    brew install fswatch
-fi
-
-# rbenv
-if ! type -P rbenv > /dev/null; then
-    brew install rbenv rbenv-vars
-fi
-export RBENV_ROOT="$(brew --prefix)/var/rbenv"
-eval "$(rbenv init -)";
-cd $(dirname ${0})
+VERSION='1.1'
 
 # CONFIGURATION
 # =============
 
 # Default variables and their values
+: ${RBENV_VARS_FILE:=".rbenv-vars"}
 : ${JEKYLL_CLEAN:="jekyll clean"}
 : ${JEKYLL_BUILD:="jekyll build"}
-: ${JEKYLL_SERVE:="jekyll serve"}
-
-: ${RBENV_VARS_FILE:=".rbenv-vars"}
+: ${JEKYLL_SERVE:="jekyll serve --open-url"}
 
 # Document available command line options. This function
 # simply outputs script's SYNOPSIS to the user terminal.
@@ -57,7 +24,6 @@ Usage:
         Options                 All options are optional and
         -------                 can be supplied in any order.
 
-        -o --open-url           Open generated site in a new tab (serve)
         -d --debug              Run jekyll in the debug mode (build, serve)
         -l --log=<path>         Redirect all output to a file
         -q --quiet              Suppress output of the script
@@ -86,11 +52,42 @@ Usage:
 EOF
 }
 
+# Script initialization: run the following code after processing all supplied
+# options but before looking at the script's arguments.
+__init() {
+    # curl
+    if ! type -P curl > /dev/null; then
+        echo "Please install CURL before using this script"
+        exit 1
+    fi
+
+    # homebrew
+    if ! type -P brew > /dev/null; then
+        /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    fi
+
+    # jq
+    if ! type -P jq > /dev/null; then
+        brew install jq
+    fi
+
+    # fswatch
+    if ! type -P fswatch > /dev/null; then
+        brew install fswatch
+    fi
+
+    # rbenv
+    if ! type -P rbenv > /dev/null; then
+        brew install rbenv rbenv-vars
+    fi
+    init_rbenv
+}
+
 # This function is called when the script receives an EXIT pseudo-signal. It
 # simulates a common destructor behaviour inside BASH scripts. It allows this
 # script to release and clean up resources upon termination.
 __exit() {
-    : # Replace with actual destructor code
+    brew cleanup
 }
 
 # FUNCTIONS
@@ -218,6 +215,15 @@ relpath() {
     echo "${result}${target#$common}"
 }
 
+# Initialise rbenv environments
+init_rbenv() {
+    if (type -P brew && type -P rbenv) > /dev/null; then
+        export RBENV_ROOT="$(brew --prefix)/var/rbenv"
+        eval "$(rbenv init -)";
+    fi
+    cd $(dirname ${0})
+}
+
 # COMMAND LINE OPTIONS
 # =====================
 #
@@ -233,9 +239,6 @@ while getopts "odl:q?-:" OPTKEY; do
     fi
 
     case ${OPTKEY} in
-        'o'|'open-url')
-            JEKYLL_SERVE+=" --open-url"
-            ;;
         'd'|'debug')
             JEKYLL_SERVE+=" --verbose --trace"
             JEKYLL_BUILD+=" --verbose --trace"
@@ -253,6 +256,7 @@ while getopts "odl:q?-:" OPTKEY; do
             exec > /dev/null
             ;;
         'version')
+            init_rbenv
             echo "Shell script $0 version ${VERSION}"
             echo $(bash --version | head -n 1)
             echo $(ruby --version)
@@ -281,8 +285,9 @@ if [[ "${1}" == "--" ]]; then
     shift
 fi
 
-# Initialise script destructor
+# Initialise the script and it's destructor
 trap __exit EXIT
+__init
 
 # SCRIPT ARGUMENTS
 # ================
@@ -292,14 +297,19 @@ if [[ ${!#} == ${0} ]]; then
     ARGS='serve'
 fi
 
+brew upgrade --cleanup
+if ! brew doctor; then
+    exit 1;
+fi
+
 # Process all supplied arguments
 for ARG in ${ARGS-${@}}; do
     case ${ARG} in
         'clean')
-            # bundle exec ${JEKYLL_CLEAN}
-            rm -Rvf .bundle
-            rm -fv Gemfile.lock
-            # rbenv local --unset
+            bundle exec ${JEKYLL_CLEAN}
+            rm -Rf .bundle && echo "Removing $(abspath .bundle)"
+            rm -fv Gemfile.lock && echo "Removing $(abspath Gemfile.lock)"
+            rbenv local --unset
             ;;
         'install')
             if ! rbenv local > /dev/null; then
