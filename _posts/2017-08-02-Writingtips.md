@@ -21,6 +21,6 @@ Another of Block’s advice is one I’m sure Dorothea Brande would agree with: 
 
 This one is primarily intended for screenwriters but a lot of McKee’s advice will be useful to any and all story-tellers. One of the suggestions I’m keen to try out is to write backwards, from the Story Climax to the Inciting Incident.
 
-I liked this idea because what often happens to me is that I come up with a great premise, and then I spend hours upon hours trying to decide what happens next and how it all ends. More often than not I get stuck and never find out. McKee suggest to look for great endings rather than intriguing beginnings. Once you have a vision of such a great ending, the Climax, try to figure out what has to have happened to lead to it in a meaningful and satisfying way.
+I liked this idea because what often happens to me is that I come up with a great premise, and then I spend hours upon hours trying to decide what happens next and how it all ends. More often than not I get stuck and never find out. McKee suggests to look for great endings rather than intriguing beginnings. Once you have a vision of such a great ending, the Climax, try to figure out what has to have happened to lead to it in a meaningful and satisfying way.
 
 Seems worth trying.
