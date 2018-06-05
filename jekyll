@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION='1.1'
+VERSION='1.2.0'
 
 # CONFIGURATION
 # =============
@@ -10,6 +10,9 @@ VERSION='1.1'
 : ${JEKYLL_CLEAN:="jekyll clean"}
 : ${JEKYLL_BUILD:="jekyll build"}
 : ${JEKYLL_SERVE:="jekyll serve --open-url"}
+
+# FUNCTIONS
+# =========
 
 # Document available command line options. This function
 # simply outputs script's SYNOPSIS to the user terminal.
@@ -41,45 +44,26 @@ Usage:
                                 adds all required build tools (inc. ruby),
                                 runs bundle install.
 
+        upgrade                 Runs `brew upgrade`, followed by `clean` and
+                                `install` targets.
+
         build                   Instructs jekyll to build your site and
                                 populate the contents of the _site directory.
 
-        serve, server           Instructs jekyll to build your site and then
+        serve, server           Instructs jekyll to build your site, then
                                 starts the server and serves it locally.
+                                (Default argument)
 
     <> - required parameters    [] - optional parameters
     Use 'less ${0}' to view further documentation.
 EOF
 }
 
-# Script initialization: run the following code after processing all supplied
+# This function is executed after processing all supplied
 # options but before looking at the script's arguments.
 __init() {
-    # curl
-    if ! type -P curl > /dev/null; then
-        echo "Please install CURL before using this script"
-        exit 1
-    fi
-
-    # homebrew
-    if ! type -P brew > /dev/null; then
-        /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    fi
-
-    # jq
-    if ! type -P jq > /dev/null; then
-        brew install jq
-    fi
-
-    # fswatch
-    if ! type -P fswatch > /dev/null; then
-        brew install fswatch
-    fi
-
-    # rbenv
-    if ! type -P rbenv > /dev/null; then
-        brew install rbenv rbenv-vars
-    fi
+    INIT_DIR="$pwd"
+    cd $(dirname ${0})
     init_rbenv
 }
 
@@ -87,11 +71,8 @@ __init() {
 # simulates a common destructor behaviour inside BASH scripts. It allows this
 # script to release and clean up resources upon termination.
 __exit() {
-    brew cleanup
+    cd ${INIT_DIR}
 }
-
-# FUNCTIONS
-# =========
 
 # Insure the presence of OPTARG in the current scope. If OPTARG is missing then
 # display help message via __help and exit with an error code.
@@ -123,105 +104,49 @@ is_true() {
     return 0
 }
 
-# Retrieve absolute path for a given relative path, of which all but the
-# last component must exist.
-abspath() {
-    if [[ -z "${1}" ]]; then
-        echo "${0}: function requires an argument" >&2
+install_required_tools() {
+    # test for curl
+    if ! type -P curl >&-; then
+        echo "Please install CURL before using this script"
         exit 1
     fi
 
-    # Expand user's home directory if required
-    case "${1}" in
-        '~')
-            local path="${HOME}"
-            ;;
-        '~/'*)
-            local path="${HOME}/${1:2}"
-            ;;
-        '~'*/*)
-            local path="$(echo ${1%%/*})/${1#*/}"
-            ;;
-        '~'*)
-            local path="$(echo ${1})"
-            ;;
-        *)
-            local path="${1}"
-            ;;
-    esac
-
-    # Initialise local variables
-    local dirname=$(dirname "${path}")
-    local basename=$(basename "${path}")
-
-    # Fetch absolute path of the parent directory
-    if [[ -d "${dirname}" ]]; then
-        local dirname=$(cd "${dirname}" && pwd)
-    else
-        echo "${0}: no such file or directory -- ${dirname}" >&2
-        return 1
+    # test for homebrew
+    if ! type -P brew >&-; then
+        /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     fi
 
-    # Dirname special case
-    if [[ "${dirname}" == '/' ]]; then
-        local dirname=''
+    # test for jq
+    if ! type -P jq >&-; then
+        brew install jq
     fi
 
-    # Basename special cases
-    case "${basename}" in
-        /)
-            echo '/'
-            ;;
-        .)
-            echo "${dirname}"
-            ;;
-        ..)
-            echo $(dirname "${dirname}")
-            ;;
-        *)
-            echo "${dirname}/${basename}"
-            ;;
-    esac
-}
-
-# Given two paths (origin and target) generate a relative path that leads
-# from origin to target. All but the last component must exist in both paths.
-relpath() {
-    if [[ -z "${1}" || -z "${2}" ]]; then
-        echo "${0}: function requires two arguments" >&2
-        exit 1
+    # test for fswatch
+    if ! type -P fswatch >&-; then
+        brew install fswatch
     fi
 
-    # Ensure that we alwais work with absolute paths
-    local origin=$(abspath "${1}")
-    local target=$(abspath "${2}")
-
-    # Initialise common prefix between origin and target
-    local common="$origin"
-    local result='.'
-
-    # Build result from origin to the common prefix
-    while [[ "${target#${common}}" == "${target}" ]]; do
-        local common=$(dirname "${common}")
-        local result="${result}/.."
-    done
-
-    # Account for the special case of root being the only common ground
-    if [[ $common == '/' ]]; then
-        echo "${result}/${target#$common}"
-        return 0
+    # test for rbenv
+    if ! type -P rbenv >&-; then
+        brew install rbenv rbenv-vars
+        init_rbenv
     fi
 
-    echo "${result}${target#$common}"
+    # clean up the installation
+    brew cleanup
+
+    # check for installation errors
+    if ! brew doctor; then
+        exit 1;
+    fi
 }
 
 # Initialise rbenv environments
 init_rbenv() {
-    if (type -P brew && type -P rbenv) > /dev/null; then
+    if (type -P brew && type -P rbenv) >&-; then
         export RBENV_ROOT="$(brew --prefix)/var/rbenv"
         eval "$(rbenv init -)";
     fi
-    cd $(dirname ${0})
 }
 
 # COMMAND LINE OPTIONS
@@ -231,7 +156,7 @@ init_rbenv() {
 # trick it into doing so by defining '-:' as part of the optspec. This
 # exploits a non-standard behaviour of the shell which permits the
 # option-argument to be concatenated to the option, eg: -f arg == -farg
-while getopts "odl:q?-:" OPTKEY; do
+while getopts "dl:q?-:" OPTKEY; do
 
     if [[ "${OPTKEY}" = '-' ]]; then
         OPTKEY=`echo ${OPTARG} | sed -e 's/=.*//'`
@@ -245,22 +170,17 @@ while getopts "odl:q?-:" OPTKEY; do
             ;;
         'l'|'log')
             require_OPTARG
-            if abspath ${OPTARG} > /dev/null; then
-                exec > ${OPTARG} 2>&1
-            else
-                echo "${0}: Failed to redirect output to file"
-                exit 1
-            fi
+            mkdir -p $(dirname ${OPTARG})
+            exec 5>&1 6>&2 # Backup STDOUT and STDERR
+            exec > ${OPTARG} 2>&1
             ;;
         'q'|'quiet')
-            exec > /dev/null
+            exec 5>&1 6>&2 # Backup STDOUT and STDERR
+            exec >&-
             ;;
         'version')
-            init_rbenv
             echo "Shell script $0 version ${VERSION}"
-            echo $(bash --version | head -n 1)
-            echo $(ruby --version)
-            echo $(bundle exec jekyll --version)
+            echo `bash --version | head -n 1`
             exit
             ;;
         '?'|'help')
@@ -285,7 +205,7 @@ if [[ "${1}" == "--" ]]; then
     shift
 fi
 
-# Initialise the script and it's destructor
+# Initialise script destructor
 trap __exit EXIT
 __init
 
@@ -297,9 +217,12 @@ if [[ ${!#} == ${0} ]]; then
     ARGS='serve'
 fi
 
-brew upgrade --cleanup
-if ! brew doctor; then
-    exit 1;
+# Upgrade brew resources
+if [[ "${@}" = *'upgrade'* ]]; then
+    ARGS= ${@//upgrade/clean install/}
+    if ! brew upgrade --cleanup; then
+        exit 1;
+    fi
 fi
 
 # Process all supplied arguments
@@ -307,12 +230,13 @@ for ARG in ${ARGS-${@}}; do
     case ${ARG} in
         'clean')
             bundle exec ${JEKYLL_CLEAN}
-            rm -Rf .bundle && echo "Removing $(abspath .bundle)"
-            rm -fv Gemfile.lock && echo "Removing $(abspath Gemfile.lock)"
+            rm -Rf .bundle && echo "Removing $(pwd)/.bundle)"
+            rm -fv Gemfile.lock && echo "Removing $(pwd)/Gemfile.lock)"
             rbenv local --unset
             ;;
         'install')
-            if ! rbenv local > /dev/null; then
+            install_required_tools
+            if ! rbenv local >&-; then
                 : ${GITHUB_PAGES_DEPENDENCIES:=$(curl -L "https://pages.github.com/versions.json")}
                 : ${GITHUB_RUBY_VERSION:=$(echo ${GITHUB_PAGES_DEPENDENCIES} | jq -r '.ruby')}
             fi
@@ -342,6 +266,12 @@ for ARG in ${ARGS-${@}}; do
         'serve'|'server')
             bundle exec ${JEKYLL_SERVE} &
             JEKYLL_PID=$!
+            sleep 2
+            if ! ps $JEKYLL_PID >&-; then
+                echo "Failed to start JEKYLL... Is it installed?"
+                echo "Try running: ${0} install"
+                exit 1
+            fi
             JEKYLL_SERVE=${JEKYLL_SERVE//--open-url}
             trap 'JEKYLL_STOP=true' SIGINT
             while fswatch --one-event --timestamp ./_config.yml; do
@@ -349,8 +279,8 @@ for ARG in ${ARGS-${@}}; do
                     echo ""
                     break
                 else
-                    kill -TERM ${JEKYLL_PID} 2>/dev/null
-                    wait ${JEKYLL_PID} 2>/dev/null
+                    kill -TERM ${JEKYLL_PID} 2>&-
+                    wait ${JEKYLL_PID} 2>&-
                     bundle exec ${JEKYLL_SERVE} &
                     JEKYLL_PID=$!
                 fi
