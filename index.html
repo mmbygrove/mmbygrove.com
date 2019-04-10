@@ -32,6 +32,30 @@ layout: default
 
 </div>
 
+<div id="mmb-flash" class="main-post-list">
+
+  <h2>Flash Fiction</h2>
+  <p>Short pieces, anywhere between 100 and 1000 words long</p>
+  <br>
+  <br>
+
+  <ol class="post-list">
+    {% for post in site.flash %}
+      <li>
+        {% include list-item-flash.html %}
+        <hr class="post-list__divider">
+      </li>
+    {% endfor %}
+  </ol>
+
+  <hr class="post-list__divider ">
+
+  {% if paginator.previous_page or paginator.next_page %}
+      {% include pagination.html %}
+  {% endif %}
+
+</div>
+
 <div id="mmb-contact" class="contact-forms">
   <h2 class="post-list__post-title post-title">Let me know about new releases!</h2>
   <p class="excerpt"> If you’d like to know when a new story is published, go ahead and subscribe below. I don’t send out many emails to this list, no regular newsletters, nothing spamy, but I’ll email you with a release update.</p>

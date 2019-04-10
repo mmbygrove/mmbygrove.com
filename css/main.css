@@ -135,7 +135,25 @@ a.publisher {
 a.publisher.amazon {
     background-image: url('/images/publishers/amazon.png');
     height: 25px;
-    width: 71px;
+    width: 30px;
+}
+
+a.publisher.AppleBooks {
+    background-image: url('/images/publishers/AppleBooks.png');
+    height: 25px;
+    width: 30px;
+}
+
+a.publisher.kobo {
+    background-image: url('/images/publishers/kobo.png');
+    height: 25px;
+    width: 30px;
+}
+
+a.publisher.pdf {
+    background-image: url('/images/publishers/pdf.png');
+    height: 25px;
+    width: 30px;
 }
 
 /* My overrides */

@@ -10,6 +10,7 @@ layout: null
         singlePageID = {
             '#blog':    '#mmb-blog',
             '#fiction': '#mmb-library',
+            '#flash': '#mmb-flash',
             '#contact': '#mmb-contact',
             '#thanks':  '#mmb-thanks'
         }

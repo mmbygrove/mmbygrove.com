@@ -22,11 +22,13 @@
           <nav class="cover-navigation cover-navigation--primary">
             <ul class="navigation">
               {% if paginator.page >= 1 %}
-                <li class="navigation__item"><a href="#fiction" class="navigation__button fiction-button">Fiction</a></li>
                 <li class="navigation__item"><a href="#blog" class="navigation__button blog-button">Blog</a></li>
+                <li class="navigation__item"><a href="#fiction" class="navigation__button fiction-button">Fiction</a></li>
+                <li class="navigation__item"><a href="#flash" class="navigation__button fiction-button">Flash</a></li>
               {% else %}
-                <li class="navigation__item"><a href="{{ "/" | relative_url }}#fiction" class="navigation__button fiction-button">Fiction</a></li>
                 <li class="navigation__item"><a href="{{ "/" | relative_url }}#blog" class="navigation__button blog-button">Blog</a></li>
+                <li class="navigation__item"><a href="{{ "/" | relative_url }}#fiction" class="navigation__button fiction-button">Fiction</a></li>
+                <li class="navigation__item"><a href="{{ "/" | relative_url }}#flash" class="navigation__button blog-button">Flash</a></li>
               {% endif %}
             </ul>
           </nav>
@@ -90,14 +92,6 @@
               {% endif %}
               </li>
             {% endif %}
-
-            <!-- RSS -->
-            <li class="navigation__item">
-              <a href="{{ "/feed.xml" | relative_url }}" title="Subscribe" target="_blank">
-                <i class="icon icon-rss"></i>
-                <span class="label">RSS</span>
-              </a>
-            </li>
 
             </ul>
           </nav>

@@ -17,12 +17,21 @@ author:
 # google_analytics: 'UA-XXXXXX-X'
 disqus_shortname: 'mmbygrove'
 
+collections:
+  flash:
+    output: true
+
 defaults:
   - scope:
       path: ''
       type: 'posts'
     values:
         layout: 'post'
+  - scope:
+      path: ''
+      type: 'flash'
+    values:
+      layout: 'flash'
 
 # Build settings
 # ==============
@@ -40,7 +49,7 @@ kramdown:
   # do not replace newlines by <br>s
   hard_wrap: false
 
-gems:
+plugins:
   - jekyll-sitemap
   - jekyll-feed
   - jekyll-paginate

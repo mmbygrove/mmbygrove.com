@@ -297,7 +297,7 @@ if [[ ${!#} == ${0} ]]; then
     ARGS='serve'
 fi
 
-brew upgrade --cleanup
+brew upgrade
 if ! brew doctor; then
     exit 1;
 fi
